@@ -26,15 +26,16 @@ struct Run: ParsableCommand {
 
     func run() throws {
         if launchd { _ = LaunchEventDrain(timeout: 1).wait() }
-        let loop = KickLoop(timeout: timeout, settle: settle, find: { try OpalDevice.find() })
+        let loop = KickLoop(timeout: timeout, settle: settle, find: { try OpalDevice.find() },
+                            log: { Output.line(Output.stamp($0)) })
         let outcome = loop.run()
         switch outcome {
         case .kicked:
             break
         case .noDevice:
-            if !quietMissing { Output.error("no Opal camera appeared within \(timeout) s") }
+            if !quietMissing { Output.error(Output.stamp("no Opal camera appeared within \(timeout) s")) }
         case .failed(let message, let kicked):
-            Output.error("\(message) (\(kicked) other device(s) succeeded)")
+            Output.error(Output.stamp("\(message) (\(kicked) other device(s) succeeded)"))
         }
         let code = KickLoop.exitCode(for: outcome, quietMissing: quietMissing)
         if code != ExitStatus.ok { throw ExitCode(code) }

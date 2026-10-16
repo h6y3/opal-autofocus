@@ -16,9 +16,13 @@ enum Output {
         FileHandle.standardError.write(Data(("opal-autofocus: " + message + "\n").utf8))
     }
 
-    static func timestamp() -> String {
+    static func timestamp(_ date: Date = Date()) -> String {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
-        return f.string(from: Date())
+        return f.string(from: date)
+    }
+
+    static func stamp(_ message: String, at date: Date = Date()) -> String {
+        "\(timestamp(date)) \(message)"
     }
 }

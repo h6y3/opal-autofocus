@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- `run` prefixes every log line with a UTC timestamp, so `agent.log` shows
+  when each kick happened.
+- `make smoke` starts with a cold-start check: it pauses the launchd agent,
+  asks you to replug and confirm the lens is parked, then confirms `run`
+  starts autofocus, and restores the agent afterwards.
+
 ## [0.1.1] - 2026-10-16
 
 ### Fixed

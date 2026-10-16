@@ -21,13 +21,12 @@ Before a release, with an Opal C1:
    `enabled autofocus` line in `~/Library/Logs/opal-autofocus/agent.log`.
    `launchctl print gui/$(id -u)/com.opal-autofocus.agent` should show the
    job `not running` with its run count up by one, not climbing.
-2. `make smoke` and answer the prompts honestly.
-3. With Opal Composer's root helper stopped
-   (`sudo launchctl bootout system/com.opalcamera.Opal.v2.cameraExtensionShim`)
-   or Composer removed, unload the agent
-   (`launchctl bootout gui/$(id -u)/com.opal-autofocus.agent`), replug the
-   camera and confirm it is parked, then `make install` again and confirm the
-   agent starts autofocus. Record the result in `docs/PROTOCOL.md`.
+2. `make smoke` and answer the prompts honestly. Its first phase is a cold
+   start: it pauses the agent, asks you to replug, and checks that the lens is
+   parked before `run` fixes it. If the lens is already focusing at that
+   point, something else is enabling autofocus (for example Opal Composer's
+   background helper), and the result says nothing about this tool; stop that
+   first. Record notable results in `docs/PROTOCOL.md`.
 
 ## Code style
 
