@@ -19,10 +19,24 @@ public struct FocusStatus: Equatable, Sendable {
     }
 }
 
+public struct ControlWrite: Equatable, Sendable {
+    public let request: UVCRequest
+    public let payload: [UInt8]
+}
+
 extension Connection {
-    /// Turns continuous autofocus on. This is the write Opal Composer sends.
+    /// A freshly plugged-in Opal reports Focus-Auto = 1 while its lens is parked and
+    /// ignores a write of 1. Autofocus starts only when the control goes from 0 to 1.
+    public static func enableAutofocusSteps(model: CameraModel) -> [ControlWrite] {
+        let request = UVCRequest.setCurrent(.focusAuto, model: model)
+        return [ControlWrite(request: request, payload: [0]), ControlWrite(request: request, payload: [1])]
+    }
+
+    /// Turns continuous autofocus on.
     public func enableAutofocus() throws {
-        try set(.focusAuto, value: 1)
+        for step in Connection.enableAutofocusSteps(model: device.model) {
+            _ = try perform(step.request, payload: step.payload)
+        }
     }
 
     /// Parks the lens at its current position.

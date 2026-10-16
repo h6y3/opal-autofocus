@@ -19,7 +19,7 @@ Camera terminal unit 1, interface 1 (`wIndex = 0x0101`):
 
 | Control | Selector | Size | Reported by the camera | Effect |
 |---|---|---|---|---|
-| Focus, Auto | 0x08 | 1 | INFO 0x01, MIN 0, MAX 1, DEF 1 | SET_CUR 0 parks the lens. SET_CUR 1 enables continuous autofocus. |
+| Focus, Auto | 0x08 | 1 | INFO 0x01, MIN 0, MAX 1, DEF 1 | SET_CUR 0 parks the lens. SET_CUR 1 after 0 enables continuous autofocus. |
 | Focus, Absolute | 0x06 | 2 | INFO 0x03, MIN 0, MAX 255, DEF 130 | Honoured when Focus-Auto is 0. 0 is nearest, 255 farthest. GET_CUR returns the last written value, not the live lens position. |
 
 Focus-Auto's INFO byte advertises GET only, yet the camera accepts SET_CUR on
@@ -30,15 +30,17 @@ on captured frames) agreed: it dropped sharply at both manual extremes and
 returned to its original level after Focus-Auto = 1.
 
 On a fresh plug-in the camera reports Focus-Auto = 1 while the lens is in fact
-parked, so reading the control does not tell you whether autofocus is
-running. This tool writes it unconditionally.
+parked, and it ignores a SET_CUR of 1 in that state. Autofocus starts only when
+the control goes from 0 to 1, so this tool always writes 0 and then 1. This was
+confirmed on a cold camera with Opal Composer and all of its helpers removed:
+writing 1 alone left the lens parked, writing 0 then 1 started autofocus.
 
 ## What Opal Composer does
 
 Composer's `OpalCameraUVCService` helper is a standard UVC controller built on
 libusb. Its autofocus path sends SET_CUR on `CT_FOCUS_AUTO_CONTROL` (selector
-8, one byte, value 1) to unit 1, interface 1, the same request this tool
-sends. No vendor request, extension-unit write, XLink message or firmware
+8, one byte, value 1) to unit 1, interface 1. This tool sends the same
+request, preceded by a write of 0 (see above). No vendor request, extension-unit write, XLink message or firmware
 upload is involved.
 
 Composer's `OpalCameraDeviceService` links Luxonis depthai and libusb. It
@@ -56,15 +58,15 @@ camera enumerating in another state, and it was not needed here.
 - Power-cycling the hub port with `uhubctl` on a VIA Labs hub re-enumerated
   the device but did not reset its focus state; only a physical replug does.
 
-## Open question
+## Composer's background helper
 
-On one physical replug during research the camera came up with autofocus
-already working before this tool sent anything. Composer installs a
-LaunchDaemon (`com.opalcamera.Opal.v2.cameraExtensionShim`) and a login item
-(`OpalLauncher.app`); one of them may send the request after Composer has run
-once in a boot. Sending Focus-Auto = 1 on every attach is harmless, so this
-tool does not depend on the answer. To verify, reboot with those helpers
-disabled (see CONTRIBUTING.md, "Hardware verification").
+Composer installs a root LaunchDaemon,
+`com.opalcamera.Opal.v2.cameraExtensionShim`, that stays running after
+Composer quits. While it was installed, the camera sometimes came up with
+autofocus already working after a replug. With the daemon removed, every cold
+plug-in leaves the lens parked until this tool runs. Composer also installs a
+camera system extension (`opalCameraExtension`); it provides Composer's virtual
+camera and contains no USB code, so it does not affect focus.
 
 ## Method
 

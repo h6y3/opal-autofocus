@@ -7,9 +7,10 @@ Composer.
 
 The Opal C1 is a good UVC webcam, but on a fresh plug-in its autofocus stays
 parked at one distance until Opal Composer has talked to it. Composer is heavy
-and no longer well maintained. The only thing Composer sends to wake autofocus
-is the standard UVC "Focus, Auto" control, so this tool sends that one control
-whenever the camera is attached and otherwise stays out of the way. The camera
+and no longer well maintained. Autofocus is controlled by the standard UVC
+"Focus, Auto" control, which the camera only honours when it changes from off
+to on. This tool flips that control off and on whenever the camera is attached
+and otherwise stays out of the way. The camera
 remains an ordinary UVC device for every app.
 
 ## Install
@@ -68,7 +69,8 @@ of this tool.
   Close it and run `opal-autofocus enable`.
 - The camera takes a few seconds to start after it is plugged in, so focus
   may hunt briefly before it settles.
-- Composer can stay installed; the two do not conflict.
+- Composer can stay installed; the two do not conflict. You can also remove
+  it entirely: this tool does not need any of its parts.
 
 ## How it works
 
