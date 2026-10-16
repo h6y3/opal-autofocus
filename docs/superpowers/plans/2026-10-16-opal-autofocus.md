@@ -21,7 +21,7 @@
 - License: MIT. Changelog: Keep a Changelog format, semantic versions, first release `0.1.0`.
 - Commit messages: imperative subject, body explains why. No co-author or model attribution lines (user rule).
 - Writing style in all docs: plain sentences, no em dashes, no marketing words.
-- GitHub owner is not decided yet. Use the literal `OWNER` in URLs; Task 11 replaces it with one `sed` once Hanyu supplies the name.
+- GitHub owner is not decided yet. Owner is `h6y3`. Repository `h6y3/opal-autofocus`, tap `h6y3/homebrew-tap`. Use `h6y3` directly in URLs.
 
 ## Review Focus
 
@@ -186,7 +186,7 @@ Expected: build succeeds; 2 tests pass. `swift run opal-autofocus --help` prints
 
 - [ ] **Step 5: Add LICENSE, placeholder README, CI, gitignore entries**
 
-`LICENSE`: the MIT license text with `Copyright (c) 2026 Hanyu Yuan`.
+`LICENSE`: the MIT license text with `Copyright (c) 2026 h6y3`.
 
 `README.md` (replaced in Task 10):
 
@@ -1688,8 +1688,8 @@ git commit -m "Add launchd agent plist, Makefile install targets and smoke scrip
 ```ruby
 class OpalAutofocus < Formula
   desc "Keep the Opal C1 webcam's autofocus enabled without Opal Composer"
-  homepage "https://github.com/OWNER/opal-autofocus"
-  head "https://github.com/OWNER/opal-autofocus.git", branch: "main"
+  homepage "https://github.com/h6y3/opal-autofocus"
+  head "https://github.com/h6y3/opal-autofocus.git", branch: "main"
   license "MIT"
 
   depends_on :macos
@@ -1868,7 +1868,7 @@ out of the way. The camera remains an ordinary UVC device for every app.
 
 ### Homebrew
 
-    brew install OWNER/tap/opal-autofocus
+    brew install h6y3/tap/opal-autofocus
     brew services start opal-autofocus
 
 `brew services` runs `opal-autofocus watch`, a resident process that sleeps
@@ -1878,7 +1878,7 @@ the event-driven launchd agent instead.
 
 ### From source
 
-    git clone https://github.com/OWNER/opal-autofocus.git
+    git clone https://github.com/h6y3/opal-autofocus.git
     cd opal-autofocus
     make install
 
@@ -2165,7 +2165,7 @@ code and `docs/PROTOCOL.md` before touching anything USB-related.
 
 - [ ] **Step 6: Check links and render**
 
-Run: `grep -rn "OWNER" README.md packaging/Formula/opal-autofocus.rb` (expected: the placeholder lines only, replaced in Task 11) and `ls docs/ARCHITECTURE.md docs/PROTOCOL.md CONTRIBUTING.md CHANGELOG.md CLAUDE.md LICENSE`.
+Run: `grep -rn "OWNER" . --exclude-dir=.build --exclude-dir=.git` (expected: no output) and `ls docs/ARCHITECTURE.md docs/PROTOCOL.md CONTRIBUTING.md CHANGELOG.md CLAUDE.md LICENSE`.
 
 - [ ] **Step 7: Commit**
 
@@ -2176,33 +2176,116 @@ git commit -m "Write README, architecture and protocol notes, contributing guide
 
 ---
 
-### Task 11: Publish preparation
+### Task 11: Publish, tag v0.1.0
 
 **Files:**
-- Modify: `README.md`, `packaging/Formula/opal-autofocus.rb` (owner name)
+- Modify: `CHANGELOG.md`, `packaging/Formula/opal-autofocus.rb`
 
-- [ ] **Step 1: Replace the owner placeholder**
+Do this only after Tasks 4 to 7 hardware checks passed.
 
-Ask Hanyu for the GitHub owner (user or organisation) and run:
-
-```bash
-sed -i '' 's/OWNER/<owner>/g' README.md packaging/Formula/opal-autofocus.rb
-grep -rn "OWNER" . --exclude-dir=.build --exclude-dir=.git || echo "no placeholders left"
-```
-
-- [ ] **Step 2: Final checks**
+- [ ] **Step 1: Final local checks**
 
 ```bash
 swift test
-make smoke
-git status --short   # expected: clean apart from the two edited files
+swift build -c release
+git status --short   # expected: clean
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Cut the changelog**
+
+In `CHANGELOG.md`, rename `## [Unreleased]` to `## [0.1.0] - <today's date>`, add an empty `## [Unreleased]` above it, and add link references at the bottom:
+
+```markdown
+[Unreleased]: https://github.com/h6y3/opal-autofocus/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/h6y3/opal-autofocus/releases/tag/v0.1.0
+```
+
+Commit: `git commit -am "Release 0.1.0"`.
+
+- [ ] **Step 3: Create the GitHub repository and push**
 
 ```bash
-git add README.md packaging/Formula/opal-autofocus.rb
-git commit -m "Point README and formula at the published repository"
+gh auth status
+gh repo create h6y3/opal-autofocus --public --source . --remote origin \
+  --description "Keep the Opal C1 webcam's autofocus enabled on macOS without Opal Composer"
+git push -u origin main
+gh run watch --exit-status $(gh run list --limit 1 --json databaseId -q '.[0].databaseId')
 ```
 
-Creating the GitHub repository, pushing, and tagging `v0.1.0` are done by Hanyu or on explicit request; they are not part of this plan.
+Expected: CI passes on GitHub. If it fails, fix on `main` before tagging.
+
+- [ ] **Step 4: Tag and release**
+
+```bash
+git tag -a v0.1.0 -m "opal-autofocus 0.1.0"
+git push origin v0.1.0
+gh release create v0.1.0 --title "0.1.0" --notes-file <(sed -n '/## \[0.1.0\]/,/## \[/p' CHANGELOG.md | sed '$d')
+```
+
+- [ ] **Step 5: Pin the formula to the release**
+
+```bash
+URL=https://github.com/h6y3/opal-autofocus/archive/refs/tags/v0.1.0.tar.gz
+SHA=$(curl -sL "$URL" | shasum -a 256 | cut -d' ' -f1)
+echo "$SHA"
+```
+
+In `packaging/Formula/opal-autofocus.rb`, add above the `head` line:
+
+```ruby
+  url "https://github.com/h6y3/opal-autofocus/archive/refs/tags/v0.1.0.tar.gz"
+  sha256 "<SHA>"
+```
+
+Commit `"Pin Homebrew formula to v0.1.0"` and push.
+
+---
+
+### Task 12: Homebrew tap
+
+**Files (in a new repository `h6y3/homebrew-tap`, cloned to the scratchpad):**
+- Create: `Formula/opal-autofocus.rb` (copy of the pinned formula), `README.md`
+
+- [ ] **Step 1: Create and clone the tap**
+
+```bash
+gh repo create h6y3/homebrew-tap --public --description "Homebrew formulae by h6y3"
+gh repo clone h6y3/homebrew-tap "$SCRATCH/homebrew-tap"
+```
+
+- [ ] **Step 2: Add the formula and README**
+
+```bash
+mkdir -p "$SCRATCH/homebrew-tap/Formula"
+cp packaging/Formula/opal-autofocus.rb "$SCRATCH/homebrew-tap/Formula/"
+```
+
+`README.md` in the tap:
+
+```markdown
+# h6y3/homebrew-tap
+
+    brew install h6y3/tap/opal-autofocus
+
+| Formula | Description |
+|---|---|
+| [opal-autofocus](https://github.com/h6y3/opal-autofocus) | Keep the Opal C1 webcam's autofocus enabled on macOS without Opal Composer |
+```
+
+Commit `"Add opal-autofocus 0.1.0"` and push.
+
+- [ ] **Step 3: Verify the published install path**
+
+```bash
+brew tap h6y3/tap
+brew install h6y3/tap/opal-autofocus
+brew test opal-autofocus
+opal-autofocus --version     # expected: 0.1.0
+brew audit --strict --online h6y3/tap/opal-autofocus
+```
+
+Since the Mac keeps the `make install` agent (Task 7), do not also run `brew services start`; uninstall the brew copy afterwards with `brew uninstall opal-autofocus` so only one agent is active, and note this in the final summary.
+
+- [ ] **Step 4: Point the README at the tap**
+
+Confirm `README.md` uses `brew install h6y3/tap/opal-autofocus` (it already should) and that `CONTRIBUTING.md` says formula changes must be copied to the tap on release. Commit and push if anything changed.
