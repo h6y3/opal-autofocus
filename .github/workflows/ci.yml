@@ -11,3 +11,6 @@ jobs:
       - run: swift --version
       - run: swift build
       - run: scripts/swift-test
+      - run: swift build -c release
+      - run: ruby -c packaging/Formula/opal-autofocus.rb
+      - run: plutil -lint packaging/com.opal-autofocus.agent.plist
