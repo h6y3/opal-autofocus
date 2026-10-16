@@ -25,7 +25,7 @@ let package = Package(
             ]
         ),
         .testTarget(name: "OpalUVCTests", dependencies: ["OpalUVC"]),
-        .testTarget(name: "OpalAutofocusCLITests", dependencies: ["OpalAutofocusCLI"]),
+        .testTarget(name: "OpalAutofocusCLITests", dependencies: ["OpalAutofocusCLI", "OpalUVC"]),
     ],
     swiftLanguageModes: [.v5]
 )

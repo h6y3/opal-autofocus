@@ -1,5 +1,10 @@
 import Testing
 import Foundation
+import OpalUVC
+
+/// True when an Opal is plugged in. Tests that would send USB requests skip in that
+/// case so running the suite never changes a camera's focus settings.
+let opalAttached = ((try? OpalDevice.find()) ?? []).isEmpty == false
 
 /// Runs the built opal-autofocus binary. These assertions hold with or without a camera attached.
 @Suite struct CLIBehaviourTests {
@@ -41,8 +46,17 @@ import Foundation
         #expect(r.stderr.contains("between 0 and 255"))
     }
 
-    @Test func runQuietMissingNeverReportsMissingDevice() throws {
+    @Test(.disabled(if: opalAttached, "would write to the attached camera"))
+    func runWithoutCameraQuietMissingExitsZero() throws {
         let r = try run(["run", "--timeout", "0", "--quiet-missing"])
-        #expect(r.status == 0 || r.status == 2, "status \(r.status) stderr \(r.stderr)")
+        #expect(r.status == 0, "status \(r.status) stderr \(r.stderr)")
+        #expect(r.stdout.isEmpty)
+    }
+
+    @Test(.disabled(if: opalAttached, "would write to the attached camera"))
+    func runWithoutCameraReportsMissingDevice() throws {
+        let r = try run(["run", "--timeout", "0"])
+        #expect(r.status == 1)
+        #expect(r.stderr.contains("no Opal camera appeared"))
     }
 }

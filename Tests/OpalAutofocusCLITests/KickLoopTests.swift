@@ -18,8 +18,9 @@ private final class Harness {
     var slept: [TimeInterval] = []
     var logged: [String] = []
 
-    func loop(timeout: TimeInterval, find: @escaping () throws -> [AutofocusTarget]) -> KickLoop {
-        KickLoop(timeout: timeout, interval: 0.25,
+    func loop(timeout: TimeInterval, settle: TimeInterval = 0,
+              find: @escaping () throws -> [AutofocusTarget]) -> KickLoop {
+        KickLoop(timeout: timeout, interval: 0.25, settle: settle,
                  sleep: { self.slept.append($0); self.clock += $0 },
                  now: { Date(timeIntervalSince1970: self.clock) },
                  find: find,
@@ -78,6 +79,25 @@ private final class Harness {
             return [FakeTarget(label: "a", error: nil)]
         }
         #expect(l.run() == .kicked(1))
+    }
+
+    @Test func settlesOnceAfterDiscoveryBeforeKicking() {
+        let h = Harness()
+        var kickedAt: [TimeInterval] = []
+        struct Recorder: AutofocusTarget {
+            let label = "a"
+            let onKick: () -> Void
+            func kick() throws { onKick() }
+        }
+        let l = h.loop(timeout: 5, settle: 0.5) { [Recorder { kickedAt.append(h.clock) }] }
+        #expect(l.run() == .kicked(1))
+        #expect(h.slept == [0.5])
+        #expect(kickedAt == [0.5])
+    }
+
+    @Test func runDefaultSettleIsHalfASecond() throws {
+        #expect(try Run.parse([]).settle == 0.5)
+        #expect(throws: (any Error).self) { try Run.parse(["--settle=-1"]) }
     }
 
     @Test func exitCodeMapping() {

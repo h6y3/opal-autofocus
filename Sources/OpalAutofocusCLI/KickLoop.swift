@@ -20,6 +20,9 @@ enum KickOutcome: Equatable {
 struct KickLoop {
     var timeout: TimeInterval
     var interval: TimeInterval = 0.25
+    /// Pause between finding the camera and sending the control, because the
+    /// USB device can be registered before the UVC driver has bound to it.
+    var settle: TimeInterval = 0
     var sleep: (TimeInterval) -> Void = { Thread.sleep(forTimeInterval: $0) }
     var now: () -> Date = Date.init
     var find: () throws -> [AutofocusTarget]
@@ -29,7 +32,10 @@ struct KickLoop {
         let deadline = now().addingTimeInterval(timeout)
         while true {
             let targets = (try? find()) ?? []
-            if !targets.isEmpty { return kick(targets) }
+            if !targets.isEmpty {
+                if settle > 0 { sleep(settle) }
+                return kick(targets)
+            }
             if now() >= deadline { return .noDevice }
             sleep(interval)
         }
