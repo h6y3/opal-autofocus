@@ -70,6 +70,13 @@ private final class Harness {
         #expect(l.run() == .failed(message: "b: SET_CUR Focus-Auto failed: kIOReturnNotResponding (0xe00002ed)", kicked: 1))
     }
 
+    @Test func everyFailureIsReported() {
+        let h = Harness()
+        let l = h.loop(timeout: 5) { [FakeTarget(label: "a", error: Boom()), FakeTarget(label: "b", error: Boom())] }
+        let detail = "SET_CUR Focus-Auto failed: kIOReturnNotResponding (0xe00002ed)"
+        #expect(l.run() == .failed(message: "a: \(detail); b: \(detail)", kicked: 0))
+    }
+
     @Test func findErrorIsTreatedAsNoDeviceThisRound() {
         let h = Harness()
         var calls = 0

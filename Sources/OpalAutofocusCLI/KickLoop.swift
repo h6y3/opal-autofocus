@@ -43,17 +43,17 @@ struct KickLoop {
 
     private func kick(_ targets: [AutofocusTarget]) -> KickOutcome {
         var kicked = 0
-        var firstFailure: String?
+        var failures: [String] = []
         for target in targets {
             do {
                 try target.kick()
                 kicked += 1
                 log("enabled autofocus on \(target.label)")
             } catch {
-                if firstFailure == nil { firstFailure = "\(target.label): \(error)" }
+                failures.append("\(target.label): \(error)")
             }
         }
-        if let firstFailure { return .failed(message: firstFailure, kicked: kicked) }
+        if !failures.isEmpty { return .failed(message: failures.joined(separator: "; "), kicked: kicked) }
         return .kicked(kicked)
     }
 

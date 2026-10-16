@@ -22,7 +22,7 @@
   - `DeviceWatcher.swift`: IOKit first-match notifications on a dispatch queue.
   - `UVCError.swift`: errors carrying the IOReturn and the request name.
 - `OpalAutofocusCLI` (executable `opal-autofocus`): swift-argument-parser
-  subcommands. `KickLoop.swift` holds the retry logic for `run` behind a small
+  subcommands. `KickLoop.swift` holds the polling loop for `run` behind a small
   protocol so it is tested with fakes. `LaunchEventDrain.swift` consumes the
   launchd event (see below).
 
@@ -58,7 +58,7 @@ worst result.
 
 `scripts/swift-test` runs the suite. Tests use Swift Testing, which ships with
 the Command Line Tools; the script adds the macro plugin path those installs
-need. Unit tests cover request packing, the model table, the retry loop and
+need. Unit tests cover request packing, the model table, the polling loop and
 argument handling. `CLIBehaviourTests` runs the built binary. Hardware
 behaviour is checked by hand with `make smoke`.
 

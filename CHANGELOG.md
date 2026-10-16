@@ -12,6 +12,8 @@ All notable changes to this project are documented here. The format follows
 - `make smoke` starts with a cold-start check: it pauses the launchd agent,
   asks you to replug and confirm the lens is parked, then confirms `run`
   starts autofocus, and restores the agent afterwards.
+- With several cameras attached, `run` reports every camera that failed, not
+  only the first.
 
 ## [0.1.1] - 2026-10-16
 

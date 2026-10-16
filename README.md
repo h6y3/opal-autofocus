@@ -35,7 +35,8 @@ the event-driven launchd agent instead. Use one or the other, not both.
 `~/Library/LaunchAgents/com.opal-autofocus.agent.plist`, and loads it. launchd
 starts the agent only when an Opal C1 appears; it enables autofocus and exits.
 Remove everything with `make uninstall`. Set `PREFIX` to install elsewhere,
-for example `make install PREFIX=/usr/local`.
+for example `make install PREFIX=/usr/local`. The agent uses the full path,
+but to run the commands below yourself, `~/.local/bin` must be on your `PATH`.
 
 Requirements: macOS 14 or newer and a Swift 6 toolchain (Xcode 16, or the
 Command Line Tools from `xcode-select --install`).
@@ -64,9 +65,6 @@ of this tool.
   report together with `system_profiler SPUSBHostDataType | grep -A10 Opal`.
 - Agent logs: `~/Library/Logs/opal-autofocus/agent.log` (make install) or
   `$(brew --prefix)/var/log/opal-autofocus.log` (brew services).
-- `could not open device: kIOReturnExclusiveAccess` means another process
-  holds the USB device exclusively, such as a browser tab with WebUSB access.
-  Close it and run `opal-autofocus enable`.
 - The camera takes a few seconds to start after it is plugged in, so focus
   may hunt briefly before it settles.
 - Composer can stay installed; the two do not conflict. You can also remove
