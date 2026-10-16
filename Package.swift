@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "opal-autofocus",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     products: [
         .executable(name: "opal-autofocus", targets: ["OpalAutofocusCLI"]),
         .library(name: "OpalUVC", targets: ["OpalUVC"]),
