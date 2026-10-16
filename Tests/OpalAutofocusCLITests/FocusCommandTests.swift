@@ -24,6 +24,6 @@ import ArgumentParser
 
     @Test func subcommandsRegistered() {
         let names = OpalAutofocus.configuration.subcommands.map { $0.configuration.commandName ?? "" }
-        #expect(Set(names) == ["status", "enable", "disable", "focus"])
+        #expect(Set(names) == ["run", "status", "enable", "disable", "focus"])
     }
 }
