@@ -1,0 +1,19 @@
+I need to build a macOS daemon that restores full autofocus functionality on an OPAL C1 webcam without relying on the official Opal Composer app, since that software is effectively abandoned and unreliable. The camera's video quality is already excellent when accessed directly via standard UVC/AVFoundation capture, but autofocus only works if Composer has run at least once per boot/connect cycle to send some initialization command or sequence to the camera's firmware. I need to identify exactly what that initialization sequence is and reproduce it independently.
+
+Please research and report on the following, with explicit technical depth:
+
+1. **Reverse-engineering approach**: What tools and methods (e.g., USB packet capture via Wireshark/USBPcap on macOS, `ioreg`, `system_profiler`, UVC descriptor inspection, or proxying Composer's traffic) are commonly used to capture the exact USB control transfers or UVC extension unit commands that Composer sends to trigger autofocus initialization on the OPAL C1 specifically or similar UVC webcams generally.
+
+2. **Existing open-source work**: Identify and evaluate any existing open-source projects, forums, GitHub repos, or community reverse-engineering efforts (e.g., OpenOpal, uvc-util, libuvc-based tools) that have already documented or solved OPAL C1 autofocus control outside of Composer. For each, state what it does, how mature/maintained it is, what license it uses, and whether it directly solves this problem or only partially helps.
+
+3. **UVC extension units**: Explain how UVC extension unit (XU) commands work in general, how to enumerate the OPAL C1's vendor-specific XU controls using tools like `uvc-util`, `libusb`, or `libuvc`, and what's the likely mechanism (XU control write, vendor-specific HID report, or a proprietary protocol over a virtual serial/control endpoint) Composer uses to kick off autofocus.
+
+4. **Daemon architecture**: Recommend a macOS-native daemon design (launchd agent vs. background app) that must satisfy these hard requirements — it must detect USB device plug/unplug events for the OPAL C1 (using IOKit notifications or similar), it must send the required initialization/autofocus command only when the camera is connected, it must consume zero or near-zero CPU/memory when the camera is not plugged in, and it must be installable as a simple, standard launchd service.
+
+5. **Language and library choice**: Compare at least three viable implementation stacks (e.g., Swift + IOKit/AVFoundation, Python + libusb/pyusb, C/C++ + libusb) in a table covering ease of IOKit integration, binary distribution complexity, dependency footprint, and suitability for an open-source contributor-friendly project.
+
+6. **Extensibility and open-source project structure**: Recommend a repository structure, documentation set (README, ARCHITECTURE.md, CONTRIBUTING.md, protocol reverse-engineering notes, changelog conventions), and coding conventions that make the project easy for both human and AI contributors to extend to other OPAL devices or additional camera controls in the future.
+
+7. **Risks and unknowns**: Call out anything uncertain — e.g., if the autofocus command is encrypted, signed, session-based, or requires state that can only be obtained by running Composer's binary (in which case document how to proxy/capture it legally and ethically) — and flag any legal/ToS concerns with reverse-engineering OPAL's proprietary protocol for an open-source release.
+
+Present findings as a structured comparison (tools/projects in tables where applicable, pros/cons, maintenance status, and a clear recommendation for which path to pursue first). If information is incomplete or uncertain, state so explicitly rather than guessing, and suggest the next concrete technical step (e.g., specific USB capture command to run) I should take to fill that gap.
