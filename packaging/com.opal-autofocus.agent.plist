@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.opal-autofocus.agent</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>@BIN@</string>
+        <string>run</string>
+        <string>--quiet-missing</string>
+        <string>--launchd</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LaunchEvents</key>
+    <dict>
+        <key>com.apple.iokit.matching</key>
+        <dict>
+            <key>com.opal-autofocus.opal-c1-attached</key>
+            <dict>
+                <key>IOProviderClass</key>
+                <string>IOUSBHostDevice</string>
+                <key>idVendor</key>
+                <integer>999</integer>
+                <key>idProduct</key>
+                <integer>63037</integer>
+                <key>IOMatchLaunchStream</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>@HOME@/Library/Logs/opal-autofocus/agent.log</string>
+    <key>StandardErrorPath</key>
+    <string>@HOME@/Library/Logs/opal-autofocus/agent.log</string>
+</dict>
+</plist>

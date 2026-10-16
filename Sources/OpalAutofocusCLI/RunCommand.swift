@@ -13,11 +13,15 @@ struct Run: ParsableCommand {
     @Flag(help: "Exit 0 instead of 1 when no camera appears (for launchd).")
     var quietMissing = false
 
+    @Flag(help: "Consume the pending launchd IOKit event first (set by the launchd agent).")
+    var launchd = false
+
     func validate() throws {
         guard timeout >= 0 else { throw ValidationError("timeout must be 0 or more seconds") }
     }
 
     func run() throws {
+        if launchd { _ = LaunchEventDrain(timeout: 1).wait() }
         let loop = KickLoop(timeout: timeout, find: { try OpalDevice.find() })
         let outcome = loop.run()
         switch outcome {
