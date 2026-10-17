@@ -1,8 +1,6 @@
 import Foundation
 import OpalUVC
 
-/// The real system behind `DoctorEnvironment`: the user's launchd plists,
-/// `launchctl print`, the camera and the agent log. Doctor only reads through it.
 struct LiveDoctorEnvironment: DoctorEnvironment {
     var home: String { FileManager.default.homeDirectoryForCurrentUser.path }
     var userID: UInt32 { getuid() }
