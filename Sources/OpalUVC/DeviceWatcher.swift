@@ -1,8 +1,7 @@
 import Foundation
 import IOKit
 
-/// Calls `onAttach` for every matching camera already present and for each one attached later,
-/// and `onDetach` if provided for each one that is unplugged.
+/// Reports attach, and detach when a detach handler is given, for every matching camera.
 public final class DeviceWatcher {
     public enum WatcherError: Error, CustomStringConvertible {
         case alreadyStarted
