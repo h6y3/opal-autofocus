@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-16
+
 ### Changed
 - A failed autofocus write no longer waits for a replug: `run` and `watch`
   retry it up to twice more, 0.5 s and 1 s apart, and log each failed attempt.
@@ -33,6 +35,7 @@ All notable changes to this project are documented here. The format follows
 - launchd user agent started by IOKit matching, installed with `make install`.
 - Homebrew formula with `brew services` support.
 
-[Unreleased]: https://github.com/h6y3/opal-autofocus/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/h6y3/opal-autofocus/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/h6y3/opal-autofocus/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/h6y3/opal-autofocus/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/h6y3/opal-autofocus/releases/tag/v0.1.0
