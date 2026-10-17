@@ -23,8 +23,10 @@
   - `UVCError.swift`: errors carrying the IOReturn and the request name.
 - `OpalAutofocusCLI` (executable `opal-autofocus`): swift-argument-parser
   subcommands. `KickLoop.swift` holds the polling loop for `run` behind a small
-  protocol so it is tested with fakes. `LaunchEventDrain.swift` consumes the
-  launchd event (see below).
+  protocol so it is tested with fakes. `WatchKick.swift` holds what `watch`
+  does when the watcher reports an attach. `Retry.swift` holds the retry
+  policy both share. `LaunchEventDrain.swift` consumes the launchd event (see
+  below).
 
 ## Process model
 
@@ -48,11 +50,15 @@ Both modes send the same USB request.
 
 ## Error handling
 
-`UVCError` names the failed request and the IOReturn. The CLI maps outcomes
-to exit codes 0, 1 and 2; `run --quiet-missing` turns "no device" into 0 so
-launchd does not record a failure when the camera leaves before we start.
-With several cameras, each is handled independently and the exit code is the
-worst result.
+`UVCError` names the failed request and the IOReturn. Both modes send the
+autofocus writes through `Retry`: up to three attempts, 0.5 s and 1 s apart,
+with each failed attempt but the last logged. This is a guard in case a freshly
+attached camera rejects a request before the UVC driver settles; no such
+failure has been seen yet. Only the last error is reported. The CLI maps
+outcomes to exit codes 0, 1 and 2; `run --quiet-missing` turns "no device"
+into 0 so launchd does not record a failure when the camera leaves before we
+start. With several cameras, each is handled independently and the exit code
+is the worst result.
 
 ## Testing
 

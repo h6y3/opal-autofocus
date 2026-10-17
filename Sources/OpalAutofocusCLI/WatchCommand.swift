@@ -18,14 +18,11 @@ struct Watch: ParsableCommand {
     func run() throws {
         let settle = self.settle
         let watcher = DeviceWatcher { device in
-            Output.line("\(Output.timestamp()) attached: \(device.label)")
-            Thread.sleep(forTimeInterval: settle)
-            do {
-                try device.open().enableAutofocus()
-                Output.line("\(Output.timestamp()) enabled autofocus on \(device.label)")
-            } catch {
-                Output.error("\(Output.timestamp()) \(device.label): \(error)")
-            }
+            WatchKick(
+                settle: settle,
+                log: { Output.line("\(Output.timestamp()) \($0)") },
+                fail: { Output.error("\(Output.timestamp()) \($0)") })
+            .run(device)
         }
         try watcher.start()
         Output.line("\(Output.timestamp()) watching for \(KnownModels.all.map(\.name).joined(separator: ", "))")

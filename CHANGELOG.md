@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Changed
+- A failed autofocus write no longer waits for a replug: `run` and `watch`
+  retry it up to twice more, 0.5 s and 1 s apart, and log each failed attempt.
 - `run` prefixes every log line with a UTC timestamp, so `agent.log` shows
   when each kick happened.
 - `make smoke` starts with a cold-start check: it pauses the launchd agent,

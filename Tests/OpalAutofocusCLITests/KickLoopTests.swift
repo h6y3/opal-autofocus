@@ -8,10 +8,6 @@ private struct FakeTarget: AutofocusTarget {
     func kick() throws { if let error { throw error } }
 }
 
-private struct Boom: Error, CustomStringConvertible {
-    var description: String { "SET_CUR Focus-Auto failed: kIOReturnNotResponding (0xe00002ed)" }
-}
-
 /// Fake clock and recorders for one KickLoop run.
 private final class Harness {
     var clock: TimeInterval = 0
@@ -86,6 +82,31 @@ private final class Harness {
             return [FakeTarget(label: "a", error: nil)]
         }
         #expect(l.run() == .kicked(1))
+    }
+
+    @Test func recoversWithBackoffAfterTransientFailures() {
+        let h = Harness()
+        let flaky = FlakyTarget(label: "a", failures: 2)
+        let l = h.loop(timeout: 5) { [flaky] }
+        let boom = Boom.message
+        #expect(l.run() == .kicked(1))
+        #expect(flaky.attempts == 3)
+        #expect(h.slept == [0.5, 1])
+        #expect(h.logged == [
+            "a: attempt 1 of 3 failed: \(boom)",
+            "a: attempt 2 of 3 failed: \(boom)",
+            "enabled autofocus on a",
+        ])
+    }
+
+    @Test func exhaustsRetriesThenReportsFailure() {
+        let h = Harness()
+        let flaky = FlakyTarget(label: "a", failures: 99)
+        let l = h.loop(timeout: 5) { [flaky] }
+        let boom = Boom.message
+        #expect(l.run() == .failed(message: "a: \(boom)", kicked: 0))
+        #expect(flaky.attempts == 3)
+        #expect(h.slept == [0.5, 1])
     }
 
     @Test func settlesOnceAfterDiscoveryBeforeKicking() {
