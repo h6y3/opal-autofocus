@@ -28,7 +28,8 @@ if $agent_was_loaded; then
     launchctl bootout "$DOMAIN/$LABEL"
     echo "(launchd agent paused so it cannot fix the camera before you look)"
 fi
-echo "Unplug the Opal, wait 5 seconds, plug it back in, and wait about 10 seconds."
+echo "Unplug the Opal's own cable (not an upstream hub, which can keep it powered),"
+echo "wait 5 seconds, plug it back in, and wait about 10 seconds."
 read "?Press Return when the preview shows video again. "
 if ! ask "Hold a hand about 10 cm from the lens. Is it blurry, i.e. autofocus parked?"; then
     echo "The camera is already focusing on a cold plug-in, so something else is enabling"

@@ -57,6 +57,9 @@ camera enumerating in another state, and it was not needed here.
 - Reading the live lens position: not exposed.
 - Power-cycling the hub port with `uhubctl` on a VIA Labs hub re-enumerated
   the device but did not reset its focus state; only a physical replug does.
+  The same goes for unplugging a powered USB-C hub from the Mac with the camera
+  still attached to it: the camera came back with autofocus on. Pulling the
+  camera's own cable left the lens parked.
 
 ## Composer's background helper
 
