@@ -86,26 +86,57 @@ private struct FakeDoctorEnvironment: DoctorEnvironment {
     }
 
     @Test func brewOnlyIsOk() {
-        let plist = plistPath(Doctor.brewLabel)
-        var environment = FakeDoctorEnvironment()
-        environment.files = [plist, executablePath]
-        environment.plists = [plist: ["ProgramArguments": [executablePath, "watch"]]]
-        environment.loaded = [Doctor.brewLabel]
-        let result = Doctor.run(environment)
+        let result = Doctor.run(brewSetupEnv(Doctor.brewLabels[0]))
+        #expect(result.checks[0] == CheckLine(status: .ok, topic: "setup",
+                                              message: "Homebrew watcher loaded (\(Doctor.brewLabels[0]))", fix: nil))
+        #expect(result.checks[1].topic == "agent")
+    }
+
+    @Test func shBrewLabelLoadedIsOk() {
+        let result = Doctor.run(brewSetupEnv(Doctor.brewLabels[0]))
+        #expect(result.checks[0] == CheckLine(status: .ok, topic: "setup",
+                                              message: "Homebrew watcher loaded (sh.brew.opal-autofocus)", fix: nil))
+        #expect(result.checks[1] == CheckLine(status: .ok, topic: "agent",
+                                              message: "sh.brew.opal-autofocus runs \(executablePath)", fix: nil))
+    }
+
+    @Test func legacyMxclLabelStillRecognised() {
+        let result = Doctor.run(brewSetupEnv(Doctor.brewLabels[1]))
         #expect(result.checks[0] == CheckLine(status: .ok, topic: "setup",
                                               message: "Homebrew watcher loaded (homebrew.mxcl.opal-autofocus)", fix: nil))
-        #expect(result.checks[1].topic == "agent")
+    }
+
+    @Test func eventAgentPlusShBrewLoadedFails() {
+        var environment = agentSetupEnv()
+        let shLabel = Doctor.brewLabels[0]
+        environment.files.insert(plistPath(shLabel))
+        environment.plists[plistPath(shLabel)] = ["ProgramArguments": [executablePath, "watch"]]
+        environment.loaded.insert(shLabel)
+        let result = Doctor.run(environment)
+        #expect(result.checks[0] == CheckLine(status: .fail, topic: "setup",
+                                              message: "two setups are loaded; use one",
+                                              fix: "brew services stop opal-autofocus"))
+        #expect(result.failed)
+    }
+
+    private func brewSetupEnv(_ label: String) -> FakeDoctorEnvironment {
+        var environment = FakeDoctorEnvironment()
+        let plist = plistPath(label)
+        environment.files = [plist, executablePath]
+        environment.plists = [plist: ["ProgramArguments": [executablePath, "watch"]]]
+        environment.loaded = [label]
+        return environment
     }
 
     @Test func bothLoadedFails() {
         let eventPlist = plistPath(Doctor.eventAgentLabel)
-        let brewPlist = plistPath(Doctor.brewLabel)
+        let brewPlist = plistPath(Doctor.brewLabels[0])
         var environment = FakeDoctorEnvironment()
         environment.files = [eventPlist, brewPlist, executablePath]
         environment.plists = [
             eventPlist: ["ProgramArguments": [executablePath, "run", "--quiet-missing", "--launchd"]],
             brewPlist: ["ProgramArguments": [executablePath, "watch"]]]
-        environment.loaded = [Doctor.eventAgentLabel, Doctor.brewLabel]
+        environment.loaded = [Doctor.eventAgentLabel, Doctor.brewLabels[0]]
         let result = Doctor.run(environment)
         #expect(result.checks[0] == CheckLine(status: .fail, topic: "setup",
                                               message: "two setups are loaded; use one",
@@ -114,7 +145,7 @@ private struct FakeDoctorEnvironment: DoctorEnvironment {
     }
 
     @Test func loadedPlusLeftoverPlistAddsNote() {
-        let brewPlist = plistPath(Doctor.brewLabel)
+        let brewPlist = plistPath(Doctor.brewLabels[0])
         var environment = agentSetupEnv()
         environment.files.insert(brewPlist)
         environment.plists[brewPlist] = ["ProgramArguments": [executablePath, "watch"]]
@@ -147,7 +178,7 @@ private struct FakeDoctorEnvironment: DoctorEnvironment {
     }
 
     @Test func brewInstalledNotLoadedSuggestsBrewStart() {
-        let plist = plistPath(Doctor.brewLabel)
+        let plist = plistPath(Doctor.brewLabels[0])
         var environment = FakeDoctorEnvironment()
         environment.files = [plist]
         environment.plists = [plist: ["ProgramArguments": [executablePath, "watch"]]]

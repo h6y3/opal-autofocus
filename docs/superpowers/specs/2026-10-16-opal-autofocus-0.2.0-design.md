@@ -177,8 +177,15 @@ Checks, in order:
    - event-driven agent: `com.opal-autofocus.agent`
      (`com.opal-autofocus.agent.plist`), installed by `make install` or by
      hand from the Homebrew caveats;
-   - Homebrew watcher: `homebrew.mxcl.opal-autofocus`
-     (`homebrew.mxcl.opal-autofocus.plist`), installed by `brew services`.
+   - Homebrew watcher: two possible labels, newest first:
+     `sh.brew.opal-autofocus` (`sh.brew.opal-autofocus.plist`), used by
+     Homebrew 7, and `homebrew.mxcl.opal-autofocus`
+     (`homebrew.mxcl.opal-autofocus.plist`), used by older Homebrew.
+     Doctor knows both: the hardware check found Homebrew 7.0.9 running the
+     watcher under `sh.brew` while doctor only looked for `homebrew.mxcl`,
+     which hid the two-setups conflict. The watcher counts as loaded when
+     either label is loaded and as installed when either plist exists, and
+     messages name the label actually seen.
 
    For each, "installed" means the plist exists and "loaded" means
    `launchctl print gui/<uid>/<label>` exits 0. Apply the first rule that

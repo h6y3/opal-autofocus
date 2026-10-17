@@ -44,7 +44,7 @@ struct DoctorReport: Equatable {
 
 enum Doctor {
     static let eventAgentLabel = "com.opal-autofocus.agent"
-    static let brewLabel = "homebrew.mxcl.opal-autofocus"
+    static let brewLabels = ["sh.brew.opal-autofocus", "homebrew.mxcl.opal-autofocus"]
     static let composerDaemonPath = "/Library/LaunchDaemons/com.opalcamera.Opal.v2.cameraExtensionShim.plist"
 
     static func run(_ env: DoctorEnvironment) -> DoctorReport {
@@ -61,30 +61,37 @@ enum Doctor {
 
     private static func appendSetupChecks(_ env: DoctorEnvironment, to checks: inout [CheckLine]) {
         let eventPlist = plistPath(env, eventAgentLabel)
-        let brewPlist = plistPath(env, brewLabel)
         let eventLoaded = env.isLoaded(label: eventAgentLabel)
-        let brewLoaded = env.isLoaded(label: brewLabel)
+        let brewLoadedLabel = brewLabels.first { env.isLoaded(label: $0) }
 
-        if eventLoaded && brewLoaded {
+        if eventLoaded && brewLoadedLabel != nil {
             checks.append(CheckLine(status: .fail, topic: "setup",
                                     message: "two setups are loaded; use one",
                                     fix: "brew services stop opal-autofocus"))
             return
         }
-        if eventLoaded || brewLoaded {
+        if eventLoaded || brewLoadedLabel != nil {
             let message = eventLoaded
                 ? "event-driven launchd agent loaded (\(eventAgentLabel))"
-                : "Homebrew watcher loaded (\(brewLabel))"
+                : "Homebrew watcher loaded (\(brewLoadedLabel!))"
             checks.append(CheckLine(status: .ok, topic: "setup", message: message, fix: nil))
-            let leftoverPlist = eventLoaded ? brewPlist : eventPlist
-            if env.fileExists(leftoverPlist) {
+            if eventLoaded {
+                for label in brewLabels {
+                    let path = plistPath(env, label)
+                    if env.fileExists(path) {
+                        checks.append(CheckLine(status: .note, topic: "setup",
+                                                message: "leftover plist, not loaded: \(path)", fix: nil))
+                    }
+                }
+            } else if env.fileExists(eventPlist) {
                 checks.append(CheckLine(status: .note, topic: "setup",
-                                        message: "leftover plist, not loaded: \(leftoverPlist)", fix: nil))
+                                        message: "leftover plist, not loaded: \(eventPlist)", fix: nil))
             }
             return
         }
         let eventInstalled = env.fileExists(eventPlist)
-        if eventInstalled || env.fileExists(brewPlist) {
+        let brewInstalled = brewLabels.contains { env.fileExists(plistPath(env, $0)) }
+        if eventInstalled || brewInstalled {
             let fix = eventInstalled
                 ? "launchctl bootstrap gui/\(env.userID) \"\(eventPlist)\""
                 : "brew services start opal-autofocus"
@@ -97,7 +104,7 @@ enum Doctor {
     }
 
     private static func appendAgentChecks(_ env: DoctorEnvironment, to checks: inout [CheckLine]) {
-        for label in [eventAgentLabel, brewLabel] {
+        for label in [eventAgentLabel] + brewLabels {
             let path = plistPath(env, label)
             guard env.fileExists(path) else { continue }
             let fix = "reinstall with the method that created \(path)"
@@ -168,7 +175,7 @@ enum Doctor {
     private static func logExcerpts(_ env: DoctorEnvironment) -> [LogExcerpt] {
         var seenPaths = Set<String>()
         var excerpts: [LogExcerpt] = []
-        for label in [eventAgentLabel, brewLabel] {
+        for label in [eventAgentLabel] + brewLabels {
             let path = plistPath(env, label)
             guard env.fileExists(path), let plist = env.plist(at: path),
                   let logPath = plist["StandardOutPath"] as? String,
