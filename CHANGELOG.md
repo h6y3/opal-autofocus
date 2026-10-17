@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-17
+
 ### Added
 - `doctor` checks the launchd or Homebrew setup, the agent's program path, the camera
   and its controls, notes Opal Composer's helper, shows recent log lines, and prints a
@@ -49,7 +51,8 @@ All notable changes to this project are documented here. The format follows
 - launchd user agent started by IOKit matching, installed with `make install`.
 - Homebrew formula with `brew services` support.
 
-[Unreleased]: https://github.com/h6y3/opal-autofocus/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/h6y3/opal-autofocus/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/h6y3/opal-autofocus/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/h6y3/opal-autofocus/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/h6y3/opal-autofocus/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/h6y3/opal-autofocus/releases/tag/v0.1.0
