@@ -4,6 +4,7 @@ import IOKit
 public enum UVCError: Error, CustomStringConvertible {
     case ioKit(IOReturn, String)
     case openFailed(IOReturn)
+    case invalidRange(minimum: Int, maximum: Int)
 
     public var description: String {
         switch self {
@@ -11,6 +12,8 @@ public enum UVCError: Error, CustomStringConvertible {
             return "\(request) failed: \(UVCError.name(of: code))"
         case .openFailed(let code):
             return "could not open device: \(UVCError.name(of: code))"
+        case .invalidRange(let minimum, let maximum):
+            return "focus range minimum \(minimum) is greater than maximum \(maximum)"
         }
     }
 

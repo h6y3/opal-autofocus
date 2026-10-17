@@ -51,8 +51,12 @@ extension Connection {
     }
 
     public func focusRange() throws -> ClosedRange<Int> {
-        let minimum = try get(.focusAbsolute, .getMin)
-        let maximum = try get(.focusAbsolute, .getMax)
+        try Self.range(minimum: try get(.focusAbsolute, .getMin), maximum: try get(.focusAbsolute, .getMax))
+    }
+
+    /// Rejects a camera whose GET_MIN exceeds GET_MAX instead of building a range that traps.
+    public static func range(minimum: Int, maximum: Int) throws -> ClosedRange<Int> {
+        guard minimum <= maximum else { throw UVCError.invalidRange(minimum: minimum, maximum: maximum) }
         return minimum...maximum
     }
 
