@@ -22,4 +22,12 @@ import Foundation
         let bogus = CameraModel(name: "none", vendorID: 0xffff, productID: 0xffff, cameraTerminalID: 1, controlInterface: 1)
         #expect(try OpalDevice.find(models: [bogus]).isEmpty)
     }
+
+    @Test func labelFallsBackToModelNameWhenSerialAndLocationAreUnknown() {
+        let withIdentity = OpalDevice(model: KnownModels.opalC1, serial: "1944", locationID: 0x01220000)
+        #expect(withIdentity.label == "Opal C1 (serial 1944, location 0x01220000)")
+        // A terminated service may have lost its registry properties.
+        let bare = OpalDevice(model: KnownModels.opalC1, serial: nil, locationID: 0)
+        #expect(bare.label == "Opal C1")
+    }
 }

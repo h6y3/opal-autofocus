@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
   fix for each problem. It changes nothing.
 - `status --json` prints the camera list as JSON for scripts and menu bar apps; the
   format is documented in the README.
+- `watch` logs a `detached:` line when a camera is unplugged.
 
 ### Changed
 - `focus` checks the position against the range the camera reports instead of a

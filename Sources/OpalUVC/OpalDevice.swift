@@ -17,6 +17,14 @@ public final class OpalDevice {
         self.locationID = (OpalDevice.property(service, "locationID") as? NSNumber)?.uint32Value ?? 0
     }
 
+    /// Builds a device without a live service, for tests and terminated services.
+    init(model: CameraModel, serial: String?, locationID: UInt32) {
+        service = 0
+        self.model = model
+        self.serial = serial
+        self.locationID = locationID
+    }
+
     deinit { IOObjectRelease(service) }
 
     /// "0x01220000"; the location string shown in labels and JSON output.
@@ -26,7 +34,8 @@ public final class OpalDevice {
 
     /// "Opal C1 (serial 1944..., location 0x01220000)"
     public var label: String {
-        "\(model.name) (serial \(serial ?? "unknown"), location \(locationString))"
+        if serial == nil && locationID == 0 { return model.name }
+        return "\(model.name) (serial \(serial ?? "unknown"), location \(locationString))"
     }
 
     public static func matchingDictionary(for model: CameraModel) -> CFMutableDictionary {

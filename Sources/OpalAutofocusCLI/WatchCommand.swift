@@ -17,13 +17,15 @@ struct Watch: ParsableCommand {
 
     func run() throws {
         let settle = self.settle
-        let watcher = DeviceWatcher { device in
-            WatchKick(
-                settle: settle,
-                log: { Output.line("\(Output.timestamp()) \($0)") },
-                fail: { Output.error("\(Output.timestamp()) \($0)") })
-            .run(device)
-        }
+        let watcher = DeviceWatcher(
+            onAttach: { device in
+                WatchKick(
+                    settle: settle,
+                    log: { Output.line("\(Output.timestamp()) \($0)") },
+                    fail: { Output.error("\(Output.timestamp()) \($0)") })
+                .run(device)
+            },
+            onDetach: { Output.line("\(Output.timestamp()) detached: \($0.label)") })
         try watcher.start()
         Output.line("\(Output.timestamp()) watching for \(KnownModels.all.map(\.name).joined(separator: ", "))")
         withExtendedLifetime(watcher) { dispatchMain() }

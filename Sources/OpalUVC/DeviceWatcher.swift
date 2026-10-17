@@ -1,7 +1,8 @@
 import Foundation
 import IOKit
 
-/// Calls `onAttach` for every matching camera already present and for each one attached later.
+/// Calls `onAttach` for every matching camera already present and for each one attached later,
+/// and `onDetach` if provided for each one that is unplugged.
 public final class DeviceWatcher {
     public enum WatcherError: Error, CustomStringConvertible {
         case alreadyStarted
@@ -15,17 +16,33 @@ public final class DeviceWatcher {
         }
     }
 
+    // Carries the model to the detach callback: a terminated service may have lost its registry properties.
+    private final class Registration {
+        unowned let watcher: DeviceWatcher
+        let model: CameraModel
+
+        init(watcher: DeviceWatcher, model: CameraModel) {
+            self.watcher = watcher
+            self.model = model
+        }
+    }
+
     private let models: [CameraModel]
     private let queue: DispatchQueue
     private let onAttach: (OpalDevice) -> Void
+    private let onDetach: ((OpalDevice) -> Void)?
     private var port: IONotificationPortRef?
     private var iterators: [io_iterator_t] = []
+    private var terminatedIterators: [io_iterator_t] = []
+    private var registrations: [Registration] = []
 
     public init(models: [CameraModel] = KnownModels.all, queue: DispatchQueue = .main,
-                onAttach: @escaping (OpalDevice) -> Void) {
+                onAttach: @escaping (OpalDevice) -> Void,
+                onDetach: ((OpalDevice) -> Void)? = nil) {
         self.models = models
         self.queue = queue
         self.onAttach = onAttach
+        self.onDetach = onDetach
     }
 
     deinit { stop() }
@@ -55,12 +72,36 @@ public final class DeviceWatcher {
             iterators.append(iterator)
             // Draining arms the notification and reports devices that are already attached.
             drain(iterator)
+
+            if onDetach != nil {
+                let registration = Registration(watcher: self, model: model)
+                var terminated: io_iterator_t = 0
+                let tkr = IOServiceAddMatchingNotification(
+                    port, kIOTerminatedNotification, OpalDevice.matchingDictionary(for: model),
+                    { refcon, iterator in
+                        guard let refcon else { return }
+                        let registration = Unmanaged<Registration>.fromOpaque(refcon).takeUnretainedValue()
+                        registration.watcher.drainTerminated(iterator, model: registration.model)
+                    },
+                    Unmanaged.passUnretained(registration).toOpaque(), &terminated)
+                guard tkr == KERN_SUCCESS else {
+                    stop()
+                    throw WatcherError.ioKit(tkr, "IOServiceAddMatchingNotification")
+                }
+                terminatedIterators.append(terminated)
+                registrations.append(registration)
+                // Draining arms the terminated notification; it reports nothing at start.
+                drainTerminated(terminated, model: model)
+            }
         }
     }
 
     public func stop() {
         for iterator in iterators { IOObjectRelease(iterator) }
         iterators.removeAll()
+        for iterator in terminatedIterators { IOObjectRelease(iterator) }
+        terminatedIterators.removeAll()
+        registrations.removeAll()
         if let port { IONotificationPortDestroy(port) }
         port = nil
     }
@@ -72,6 +113,12 @@ public final class DeviceWatcher {
                 continue
             }
             onAttach(OpalDevice(service: service, model: model))
+        }
+    }
+
+    private func drainTerminated(_ iterator: io_iterator_t, model: CameraModel) {
+        while case let service = IOIteratorNext(iterator), service != 0 {
+            onDetach?(OpalDevice(service: service, model: model))
         }
     }
 }

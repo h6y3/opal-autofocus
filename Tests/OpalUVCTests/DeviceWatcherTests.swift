@@ -15,6 +15,28 @@ import Foundation
         for model in seen.value { #expect(KnownModels.all.contains(model)) }
     }
 
+    @Test func startWithDetachHandlerReportsAttachOnly() throws {
+        let present = try OpalDevice.find().count
+        let queue = DispatchQueue(label: "watcher-test-detach")
+        let counts = LockedBox<(attached: Int, detached: Int)>((0, 0))
+        let watcher = DeviceWatcher(
+            queue: queue,
+            onAttach: { _ in counts.mutate { $0.attached += 1 } },
+            onDetach: { _ in counts.mutate { $0.detached += 1 } })
+        try watcher.start()
+        queue.sync {}  // initial scan runs synchronously inside start(); drain anything queued
+        #expect(counts.value.attached == present)
+        #expect(counts.value.detached == 0)
+        watcher.stop()
+
+        counts.mutate { $0 = (0, 0) }
+        try watcher.start()
+        queue.sync {}
+        #expect(counts.value.attached == present)
+        #expect(counts.value.detached == 0)
+        watcher.stop()
+    }
+
     @Test func startTwiceThrows() throws {
         let watcher = DeviceWatcher(queue: DispatchQueue(label: "w")) { _ in }
         try watcher.start()

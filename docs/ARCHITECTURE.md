@@ -19,7 +19,7 @@
   - `Connection.swift`: an open handle; `perform(_:payload:)` runs one request.
   - `FocusControl.swift`: `enableAutofocus`, `disableAutofocus`, `setFocus`,
     `focusRange`, `focusStatus`.
-  - `DeviceWatcher.swift`: IOKit first-match notifications on a dispatch queue.
+  - `DeviceWatcher.swift`: IOKit first-match (attach) and terminated (detach) notifications on a dispatch queue.
   - `UVCError.swift`: errors carrying the IOReturn and the request name.
 - `OpalAutofocusCLI` (executable `opal-autofocus`): swift-argument-parser
   subcommands. `KickLoop.swift` holds the polling loop for `run` behind a small
