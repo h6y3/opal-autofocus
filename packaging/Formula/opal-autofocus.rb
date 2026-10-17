@@ -1,8 +1,8 @@
 class OpalAutofocus < Formula
   desc "Keep the Opal C1 webcam's autofocus enabled without Opal Composer"
   homepage "https://github.com/h6y3/opal-autofocus"
-  url "https://github.com/h6y3/opal-autofocus/archive/refs/tags/v0.1.2.tar.gz"
-  sha256 "164986d37eb2579e83405d40b23bee3a251cc48a1ef1d41bda7e32066f2531ff"
+  url "https://github.com/h6y3/opal-autofocus/archive/refs/tags/v0.2.0.tar.gz"
+  sha256 "c55e3c75514d90b656dfe4f6cdef63c30240647ca2a422636c82a4e34c2c0a8e"
   license "MIT"
   head "https://github.com/h6y3/opal-autofocus.git", branch: "main"
 
