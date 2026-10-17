@@ -58,6 +58,35 @@ fixed aperture, so the only way to soften a background is to put the focus
 plane where you want it. Composer's blur is done in software and is not part
 of this tool.
 
+## Scripting
+
+`opal-autofocus status --json` prints one JSON object with every attached
+camera, and errors are written to stderr so stdout stays parseable. Exit
+codes: 0 success, 1 no camera attached, 2 the camera rejected a request.
+A camera whose controls could not be read appears with an `error` field and
+no focus fields.
+
+```json
+{
+  "cameras" : [
+    {
+      "autofocus" : true,
+      "default" : 130,
+      "location" : "0x01220000",
+      "maximum" : 255,
+      "minimum" : 0,
+      "model" : "Opal C1",
+      "position" : 130,
+      "serial" : "1944301031042E1800"
+    }
+  ],
+  "schema" : 1
+}
+```
+
+`schema` changes only when a field is removed or its meaning changes. New
+fields can appear without a bump.
+
 ## Troubleshooting
 
 - `opal-autofocus status` prints the control values the camera reports. If

@@ -19,9 +19,14 @@ public final class OpalDevice {
 
     deinit { IOObjectRelease(service) }
 
+    /// "0x01220000"; the location string shown in labels and JSON output.
+    public var locationString: String {
+        String(format: "0x%08x", locationID)
+    }
+
     /// "Opal C1 (serial 1944..., location 0x01220000)"
     public var label: String {
-        "\(model.name) (serial \(serial ?? "unknown"), location \(String(format: "0x%08x", locationID)))"
+        "\(model.name) (serial \(serial ?? "unknown"), location \(locationString))"
     }
 
     public static func matchingDictionary(for model: CameraModel) -> CFMutableDictionary {

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `status --json` prints the camera list as JSON for scripts and menu bar apps; the
+  format is documented in the README.
+
 ### Changed
 - `focus` checks the position against the range the camera reports instead of a
   fixed 0 to 255, and rejects an out-of-range value without moving the lens on

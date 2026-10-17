@@ -25,7 +25,9 @@
   subcommands. `KickLoop.swift` holds the polling loop for `run` behind a small
   protocol so it is tested with fakes. `FocusApply.swift` holds the range check
   and write pass for `focus` behind a small protocol so it is tested with
-  fakes. `WatchKick.swift` holds what `watch`
+  fakes. `CameraSnapshot.swift` reads one camera's state into a value the CLI
+  renders. `StatusJSON.swift` renders those values as the `status --json`
+  output. `WatchKick.swift` holds what `watch`
   does when the watcher reports an attach. `Retry.swift` holds the retry
   policy both share. `LaunchEventDrain.swift` consumes the launchd event (see
   below).

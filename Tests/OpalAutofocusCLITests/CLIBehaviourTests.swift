@@ -46,6 +46,25 @@ let opalAttached = ((try? OpalDevice.find()) ?? []).isEmpty == false
         #expect(r.stderr.contains("between 0 and 65535"))
     }
 
+    @Test(.disabled(if: opalAttached, "needs no camera attached"))
+    func statusJSONWithoutCameraIsOnlyJSON() throws {
+        let r = try run(["status", "--json"])
+        #expect(r.status == 1, "status \(r.status) stderr \(r.stderr)")
+        let parsed = try JSONSerialization.jsonObject(with: Data(r.stdout.utf8)) as? [String: Any]
+        #expect((parsed?["cameras"] as? [Any])?.isEmpty == true)
+        #expect(parsed?["schema"] as? Int == 1)
+    }
+
+    @Test(.enabled(if: opalAttached, "needs a camera"))
+    func statusJSONWithCameraParses() throws {
+        let r = try run(["status", "--json"])
+        #expect(r.status == 0, "status \(r.status) stderr \(r.stderr)")
+        let parsed = try JSONSerialization.jsonObject(with: Data(r.stdout.utf8)) as? [String: Any]
+        let cameras = try #require(parsed?["cameras"] as? [[String: Any]])
+        #expect(cameras.count >= 1)
+        #expect(cameras[0]["model"] as? String == "Opal C1")
+    }
+
     @Test(.disabled(if: opalAttached, "would write to the attached camera"))
     func runWithoutCameraQuietMissingExitsZero() throws {
         let r = try run(["run", "--timeout", "0", "--quiet-missing"])
