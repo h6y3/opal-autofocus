@@ -44,10 +44,16 @@ extension Connection {
         try set(.focusAuto, value: 0)
     }
 
-    /// Manual focus. 0 is nearest, 255 is farthest on the Opal C1.
-    public func setFocus(_ position: UInt8) throws {
+    /// Manual focus within focusRange(); lower is nearer.
+    public func setFocus(_ position: Int) throws {
         try set(.focusAuto, value: 0)
-        try set(.focusAbsolute, value: Int(position))
+        try set(.focusAbsolute, value: position)
+    }
+
+    public func focusRange() throws -> ClosedRange<Int> {
+        let minimum = try get(.focusAbsolute, .getMin)
+        let maximum = try get(.focusAbsolute, .getMax)
+        return minimum...maximum
     }
 
     public func focusStatus() throws -> FocusStatus {

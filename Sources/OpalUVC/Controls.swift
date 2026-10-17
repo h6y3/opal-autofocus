@@ -9,3 +9,7 @@ public struct CameraTerminalControl: Equatable, Sendable {
 
     public static let all: [CameraTerminalControl] = [focusAbsolute, focusAuto]
 }
+
+extension CameraTerminalControl {
+    public var maxEncodableValue: Int { (1 << (8 * size)) - 1 }
+}

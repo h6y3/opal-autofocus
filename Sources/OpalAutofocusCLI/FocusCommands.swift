@@ -34,18 +34,21 @@ struct Disable: ParsableCommand {
 
 struct Focus: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "focus", abstract: "Set a fixed focus position (0 nearest, 255 farthest).")
+        commandName: "focus",
+        abstract: "Set a fixed focus position (lower is nearer; run status to see the camera's range).")
 
-    @Argument(help: "Lens position, 0 to 255.")
+    @Argument(help: "Lens position within the camera's range (see status).")
     var position: Int
 
     func validate() throws {
-        guard (0...255).contains(position) else {
-            throw ValidationError("position must be between 0 and 255")
+        let max = CameraTerminalControl.focusAbsolute.maxEncodableValue
+        guard (0...max).contains(position) else {
+            throw ValidationError("position must be between 0 and \(max)")
         }
     }
 
     func run() throws {
-        try applyToAllDevices("set focus position \(position)") { try $0.setFocus(UInt8(position)) }
+        let code = applyFocus(position, to: try OpalDevice.find(), log: Output.line, fail: Output.error)
+        if code != ExitStatus.ok { throw ExitCode(code) }
     }
 }

@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- `focus` checks the position against the range the camera reports instead of a
+  fixed 0 to 255, and rejects an out-of-range value without moving the lens on
+  any camera. With no camera attached, an out-of-range value now exits 1 (no
+  camera) instead of 64.
+
 ## [0.1.2] - 2026-10-16
 
 ### Changed

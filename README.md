@@ -46,7 +46,7 @@ Command Line Tools from `xcode-select --install`).
     opal-autofocus status          # show attached cameras and focus state
     opal-autofocus enable          # turn continuous autofocus on
     opal-autofocus disable         # park the lens where it is
-    opal-autofocus focus 180       # fixed focus position, 0 near to 255 far
+    opal-autofocus focus 180       # fixed focus position within the range status shows (0 to 255 on the Opal C1)
     opal-autofocus run             # what the launchd agent runs
     opal-autofocus watch           # stay resident and handle each attach
 

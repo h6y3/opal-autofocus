@@ -41,9 +41,9 @@ let opalAttached = ((try? OpalDevice.find()) ?? []).isEmpty == false
     }
 
     @Test func focusOutOfRangeIsUsageError() throws {
-        let r = try run(["focus", "300"])
+        let r = try run(["focus", "70000"])
         #expect(r.status == 64)
-        #expect(r.stderr.contains("between 0 and 255"))
+        #expect(r.stderr.contains("between 0 and 65535"))
     }
 
     @Test(.disabled(if: opalAttached, "would write to the attached camera"))

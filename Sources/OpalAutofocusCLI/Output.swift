@@ -4,6 +4,7 @@ enum ExitStatus {
     static let ok: Int32 = 0
     static let noDevice: Int32 = 1
     static let requestFailed: Int32 = 2
+    static let usage: Int32 = 64
 }
 
 enum Output {

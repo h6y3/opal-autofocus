@@ -18,12 +18,14 @@
   - `OpalDevice.swift`: IOKit matching and discovery.
   - `Connection.swift`: an open handle; `perform(_:payload:)` runs one request.
   - `FocusControl.swift`: `enableAutofocus`, `disableAutofocus`, `setFocus`,
-    `focusStatus`.
+    `focusRange`, `focusStatus`.
   - `DeviceWatcher.swift`: IOKit first-match notifications on a dispatch queue.
   - `UVCError.swift`: errors carrying the IOReturn and the request name.
 - `OpalAutofocusCLI` (executable `opal-autofocus`): swift-argument-parser
   subcommands. `KickLoop.swift` holds the polling loop for `run` behind a small
-  protocol so it is tested with fakes. `WatchKick.swift` holds what `watch`
+  protocol so it is tested with fakes. `FocusApply.swift` holds the range check
+  and write pass for `focus` behind a small protocol so it is tested with
+  fakes. `WatchKick.swift` holds what `watch`
   does when the watcher reports an attach. `Retry.swift` holds the retry
   policy both share. `LaunchEventDrain.swift` consumes the launchd event (see
   below).
