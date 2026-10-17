@@ -27,8 +27,13 @@
   and write pass for `focus` behind a small protocol so it is tested with
   fakes. `CameraSnapshot.swift` reads one camera's state into a value the CLI
   renders. `StatusJSON.swift` renders those values as the `status --json`
-  output. `WatchKick.swift` holds what `watch`
-  does when the watcher reports an attach. `Retry.swift` holds the retry
+  output. `Doctor.swift` holds the `doctor` checks as pure logic over the small
+  `DoctorEnvironment` protocol (`DoctorEnvironment.swift`);
+  `LiveDoctorEnvironment.swift` implements that protocol against the real
+  system (the launchd plists, `launchctl print` per label, the camera list
+  and the log tail) and `DoctorCommand.swift` carries the subcommand. The
+  doctor logic is tested with a fake environment. `WatchKick.swift` holds
+  what `watch` does when the watcher reports an attach. `Retry.swift` holds the retry
   policy both share. `LaunchEventDrain.swift` consumes the launchd event (see
   below).
 

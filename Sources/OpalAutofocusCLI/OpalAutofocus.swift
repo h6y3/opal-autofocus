@@ -7,6 +7,6 @@ struct OpalAutofocus: ParsableCommand {
         commandName: "opal-autofocus",
         abstract: "Keep the Opal C1 webcam's autofocus enabled without Opal Composer.",
         version: OpalUVC.version,
-        subcommands: [Run.self, Watch.self, Status.self, Enable.self, Disable.self, Focus.self]
+        subcommands: [Run.self, Watch.self, Status.self, DoctorCommand.self, Enable.self, Disable.self, Focus.self]
     )
 }

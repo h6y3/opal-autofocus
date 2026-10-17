@@ -7,6 +7,9 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- `doctor` checks the launchd or Homebrew setup, the agent's program path, the camera
+  and its controls, notes Opal Composer's helper, shows recent log lines, and prints a
+  fix for each problem. It changes nothing.
 - `status --json` prints the camera list as JSON for scripts and menu bar apps; the
   format is documented in the README.
 

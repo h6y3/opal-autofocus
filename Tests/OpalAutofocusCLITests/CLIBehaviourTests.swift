@@ -35,9 +35,15 @@ let opalAttached = ((try? OpalDevice.find()) ?? []).isEmpty == false
     @Test func helpListsSubcommands() throws {
         let r = try run(["--help"])
         #expect(r.status == 0)
-        for name in ["run", "watch", "status", "enable", "disable", "focus"] {
+        for name in ["run", "watch", "status", "doctor", "enable", "disable", "focus"] {
             #expect(r.stdout.contains(name), "missing \(name)")
         }
+    }
+
+    @Test func doctorRuns() throws {
+        let r = try run(["doctor"])
+        #expect(r.status == 0 || r.status == 1, "doctor exit \(r.status), stderr: \(r.stderr)")
+        #expect(r.stdout.hasPrefix("opal-autofocus "), "stdout starts with: \(r.stdout)")
     }
 
     @Test func focusOutOfRangeIsUsageError() throws {

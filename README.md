@@ -89,6 +89,7 @@ fields can appear without a bump.
 
 ## Troubleshooting
 
+- Run `opal-autofocus doctor` first and include its output in bug reports.
 - `opal-autofocus status` prints the control values the camera reports. If
   `autofocus: off` persists after `enable`, include that output in a bug
   report together with `system_profiler SPUSBHostDataType | grep -A10 Opal`.

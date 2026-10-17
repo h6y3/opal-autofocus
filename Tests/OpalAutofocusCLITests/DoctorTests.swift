@@ -185,6 +185,17 @@ private struct FakeDoctorEnvironment: DoctorEnvironment {
                                               fix: "reinstall with the method that created \(plist)"))
     }
 
+    @Test func plistWithoutProgramKeyFails() {
+        let plist = plistPath(Doctor.eventAgentLabel)
+        var environment = FakeDoctorEnvironment()
+        environment.files = [plist]
+        environment.plists = [plist: ["Label": Doctor.eventAgentLabel]]
+        let result = Doctor.run(environment)
+        #expect(result.checks[1] == CheckLine(status: .fail, topic: "agent",
+                                              message: "cannot read \(plist)",
+                                              fix: "reinstall with the method that created \(plist)"))
+    }
+
     @Test func programKeyFallback() {
         let plist = plistPath(Doctor.eventAgentLabel)
         var environment = FakeDoctorEnvironment()
@@ -232,6 +243,18 @@ private struct FakeDoctorEnvironment: DoctorEnvironment {
         #expect(result.checks[2] == CheckLine(status: .fail, topic: "controls",
                                               message: "\(goodLabel): autofocus is off",
                                               fix: "opal-autofocus enable; if it is off again after every replug, check the setup line above"))
+    }
+
+    @Test func failedControlsReadingFails() {
+        var environment = FakeDoctorEnvironment()
+        environment.cameraList = .success([CameraSnapshot(
+            model: "Opal C1", serial: "1944301031042E1800", location: "0x01220000",
+            label: goodLabel, reading: .failed(Boom.message))])
+        let result = Doctor.run(environment)
+        #expect(result.checks[1] == CheckLine(status: .ok, topic: "camera", message: goodLabel, fix: nil))
+        #expect(result.checks[2] == CheckLine(status: .fail, topic: "controls",
+                                              message: "\(goodLabel): \(Boom.message)", fix: nil))
+        #expect(result.failed)
     }
 
     @Test func twoCamerasOneOff() {
